@@ -1,0 +1,23 @@
+---
+- name: Jellyfin 미디어 서버 자동 배포 플레이북
+  hosts: nas
+  gather_facts: false
+  become: true
+
+  tasks:
+    - name: 1. Jellyfin 설정 파일이 저장될 폴더 만들기
+      ansible.builtin.file:
+        path: /volume1/docker/jellyfin/config
+        state: directory
+        mode: '0755'
+
+    - name: 2. Jellyfin 컨테이너를 8097 포트로 실행하기
+      ansible.builtin.command: >
+        /usr/local/bin/docker run -d
+        --name jellyfin_ansible
+        --restart unless-stopped
+        -p 8097:8096
+        -v /volume1/docker/jellyfin/config:/config
+        -v /volume1/Media:/media
+        jellyfin/jellyfin:latest
+      ignore_errors: true
